@@ -6,15 +6,26 @@
 - 隔离临时 .env 文件
 - 提供 FastAPI TestClient
 
-实现：通过 monkeypatch 设置环境变量，再构造新的 Settings 实例。
+实现：通过临时 .env 文件传递配置，避免污染工作目录。
 """
 from __future__ import annotations
 
 import importlib
+import shutil
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+
+
+@pytest.fixture(autouse=True)
+def _cleanup_test_dirs():
+    """每个测试后清理可能误创建在 cwd 的 test_* 目录（防御性）。"""
+    yield
+    cwd = Path.cwd()
+    for p in cwd.glob("test_*"):
+        if p.is_dir():
+            shutil.rmtree(p, ignore_errors=True)
 
 
 @pytest.fixture
@@ -37,12 +48,6 @@ def isolated_settings(
     tmp_path: Path, tmp_db_path: Path, tmp_prompts_dir: Path, monkeypatch
 ):
     """构造隔离的 Settings 实例，不影响全局 ``settings``。"""
-    monkeypatch.setenv("APP_DEBUG", "false")
-    monkeypatch.setenv("DATABASE_PATH", str(tmp_db_path.relative_to(tmp_path.parent)))
-    monkeypatch.setenv("PROMPTS_DIR", str(tmp_prompts_dir.relative_to(tmp_path.parent)))
-
-    from app import config as config_module
-
     test_env = tmp_path / ".env"
     test_env.write_text(
         f"APP_DEBUG=false\n"
@@ -50,6 +55,8 @@ def isolated_settings(
         f"PROMPTS_DIR={tmp_prompts_dir}\n",
         encoding="utf-8",
     )
+
+    from app import config as config_module
 
     original_env_file = config_module.Settings.model_config["env_file"]
     config_module.Settings.model_config["env_file"] = str(test_env)
