@@ -22,7 +22,7 @@ AI 驱动的本地数学题库管理系统。
 | 后端 | Python 3.12 + FastAPI + Uvicorn |
 | 数据库 | SQLite 3（WAL 模式） |
 | 模板 | Jinja2 |
-| 前端 | Tailwind CSS + KaTeX + HTMX（待接入）+ Alpine.js（待接入） |
+| 前端 | Tailwind CSS + KaTeX + HTMX + Alpine.js |
 | AI | OpenAI 兼容 LLM + PaddleOCR |
 | 公式 | KaTeX（渲染）· LaTeX（导出） |
 | 图表 | Chart.js |
@@ -72,7 +72,7 @@ MathForge/
 │   ├── logging_config.py    # logging 配置
 │   ├── models/              # Pydantic 模型 + 业务枚举
 │   ├── services/            # 业务服务（prompt_loader 等）
-│   ├── routers/             # API 路由（待补）
+│   ├── routers/             # API 路由（questions 等）
 │   ├── templates/           # Jinja2 页面
 │   └── static/              # 静态资源
 ├── data/
@@ -87,7 +87,7 @@ MathForge/
 ├── .backups/                # 数据库自动备份
 ├── scripts/                 # 独立脚本
 │   └── init_db.py
-├── tests/                   # pytest 测试（75 用例 / 97% 覆盖）
+├── tests/                   # pytest 测试（124 用例 / 97% 覆盖）
 ├── run.py                   # 一键启动
 ├── requirements.txt
 ├── requirements-dev.txt
@@ -101,7 +101,7 @@ MathForge/
 | 阶段 | 内容 | 状态 |
 |---|---|---|
 | P0 | 项目骨架 + SQLite 建表 + 初始脚本 | 完成 |
-| P1 | 浏览筛选 + 题目详情（HTMX 无刷新） | 待开始 |
+| P1 | 浏览筛选 + 题目详情（HTMX 无刷新） | 完成 |
 | P2 | 组卷 + 答案模式 + 导出 HTML/LaTeX | 待开始 |
 | P3 | 统计仪表盘 + 高频考点排行 | 待开始 |
 | P4 | 录入引擎（三种模式 + 审查界面 + OCR 集成） | 待开始 |
