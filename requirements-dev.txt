@@ -1,0 +1,11 @@
+# 开发期依赖（与运行时分离）
+# 安装：pip install -r requirements.txt -r requirements-dev.txt
+
+# 测试
+pytest==8.3.4
+pytest-cov==6.0.0
+httpx==0.28.1
+
+# 代码质量
+ruff==0.8.4
+mypy==1.14.0
