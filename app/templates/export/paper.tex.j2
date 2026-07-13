@@ -1,0 +1,34 @@
+{% autoescape false %}
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage{amsmath,amssymb,geometry,enumitem}
+\geometry{left=2cm,right=2cm,top=2.5cm,bottom=2.5cm}
+
+\title{ {{ paper.title }} }
+\date{}
+\begin{document}
+\maketitle
+
+{% for q in questions %}
+\section*{第 {{ loop.index }} 题}
+
+{{ q.stem | latex_escape }}
+
+{% if q.answer and answer_mode == 0 %}
+\noindent\textbf{答案：}{{ q.answer | latex_escape }}
+{% endif %}
+
+{% if q.solution and answer_mode == 0 %}
+\begin{solution}
+{{ q.solution | latex_escape }}
+\end{solution}
+{% endif %}
+
+{% if answer_mode == 1 %}
+\vspace{5cm}
+{% elif answer_mode == 2 %}
+\newpage
+{% endif %}
+
+{% endfor %}
+\end{document}
+{% endautoescape %}
