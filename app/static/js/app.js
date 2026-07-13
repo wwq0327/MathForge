@@ -1,3 +1,11 @@
-// MathForge 前端脚本占位
-// 后续阶段在此挂载 Alpine.js 组件、HTMX 行为、KaTeX 自动渲染
-console.log("MathForge client ready");
+// HTMX + KaTeX 集成：局部刷新后重新渲染公式
+document.addEventListener("htmx:afterSwap", function (event) {
+  if (typeof renderMathInElement === "function") {
+    renderMathInElement(event.target, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+      ],
+    });
+  }
+});
