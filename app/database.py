@@ -14,13 +14,26 @@
 from __future__ import annotations
 
 import os
+import shutil
 import sqlite3
 import tempfile
 from contextlib import contextmanager
+from datetime import datetime
 from pathlib import Path
 from typing import Iterator
 
 from .config import settings
+
+
+ALLOWED_TABLES: frozenset[str] = frozenset(
+    {
+        "knowledge_tree",
+        "papers",
+        "passages",
+        "questions",
+        "generated_papers",
+    }
+)
 
 
 SCHEMA_SQL = """
@@ -184,20 +197,27 @@ def atomic_write_text(path: Path, content: str) -> None:
 
 
 def backup_database(target: Path | None = None) -> Path:
-    """备份数据库到 .backups/ 目录，返回备份文件路径。"""
-    import shutil
-    from datetime import datetime
+    r"""备份数据库到 .backups/ 目录，返回备份文件路径。
 
+    优先用 SQLite 原生 ``Connection.backup()``（一致性好）；目标存在时不覆盖。
+    """
     src = settings.db_path
     if not src.exists():
         raise FileNotFoundError(f"数据库不存在: {src}")
 
-    dst_dir = settings.backups_path
-    dst_dir.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    dst = dst_dir / f"vault-{stamp}.db"
     if target is not None:
         target.parent.mkdir(parents=True, exist_ok=True)
         dst = target
-    shutil.copy2(src, dst)
+    else:
+        dst_dir = settings.backups_path
+        dst_dir.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        dst = dst_dir / f"vault-{stamp}.db"
+
+    if dst.exists():
+        raise FileExistsError(f"备份目标已存在: {dst}")
+
+    with _connect(src) as src_conn:
+        with sqlite3.connect(str(dst)) as dst_conn:
+            src_conn.backup(dst_conn)
     return dst

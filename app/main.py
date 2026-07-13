@@ -1,29 +1,19 @@
-"""MathForge FastAPI 入口。
-
-P0 范围：
-- 应用实例创建
-- 模板与静态文件挂载
-- 基础首页 + 健康检查
-- 数据库健康检查
-
-后续阶段在此注册更多路由：questions / papers / ingest / stats。
-"""
+"""MathForge FastAPI 入口。"""
 from __future__ import annotations
-
-from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from .config import settings
+from .config import PROJECT_ROOT, STATIC_DIR, TEMPLATES_DIR, settings
 from .database import get_connection
+from .logging_config import configure as configure_logging
+from .logging_config import get_logger
 
 
-PROJECT_ROOT = Path(__file__).resolve().parent
-TEMPLATES_DIR = PROJECT_ROOT / "templates"
-STATIC_DIR = PROJECT_ROOT / "static"
+configure_logging(log_dir=settings.db_path.parent, level="DEBUG" if settings.app_debug else "INFO")
+log = get_logger("main")
 
 
 app = FastAPI(
@@ -33,13 +23,13 @@ app = FastAPI(
     debug=settings.app_debug,
 )
 
-app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR), html=False), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse, tags=["system"])
 async def index(request: Request) -> HTMLResponse:
-    """首页：P0 占位，显示项目名与阶段信息。"""
+    """首页：当前阶段概览。"""
     return templates.TemplateResponse(
         "base.html",
         {
@@ -51,28 +41,37 @@ async def index(request: Request) -> HTMLResponse:
     )
 
 
-@app.get("/health")
-async def health() -> dict:
-    """健康检查：同时验证数据库可读。"""
+@app.get("/health", tags=["system"])
+async def health() -> JSONResponse:
+    """健康检查：DB 不可读时返回 503，不向客户端泄露错误细节。"""
     try:
         with get_connection() as conn:
             conn.execute("SELECT 1").fetchone()
-        db_ok = True
     except Exception as exc:  # noqa: BLE001
-        return {"status": "degraded", "database": False, "error": str(exc)}
-    return {"status": "ok", "database": db_ok, "version": app.version}
+        log.exception("health check failed")
+        return JSONResponse(
+            status_code=503,
+            content={"status": "degraded", "database": False, "error": "database unavailable"},
+            headers={"X-Error-Reason": "db-unavailable" if str(exc) else ""},
+        )
+    return JSONResponse(
+        status_code=200,
+        content={"status": "ok", "database": True, "version": app.version},
+    )
 
 
-@app.get("/api/stats/summary")
+@app.get("/api/stats/summary", tags=["system"])
 async def stats_summary() -> dict:
     """统计摘要：表行数。P3 阶段替换为完整仪表盘数据。"""
+    from .database import ALLOWED_TABLES
+
+    summary: dict[str, int] = {}
     with get_connection() as conn:
-        tables = conn.execute(
+        rows = conn.execute(
             "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
         ).fetchall()
-        summary = {}
-        for (name,) in tables:
-            summary[name] = conn.execute(
-                f"SELECT COUNT(*) FROM {name}"
-            ).fetchone()[0]
+        for (name,) in rows:
+            if name not in ALLOWED_TABLES:
+                continue
+            summary[name] = conn.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0]
     return summary

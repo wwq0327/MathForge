@@ -7,6 +7,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+TEMPLATES_DIR = PROJECT_ROOT / "app" / "templates"
+STATIC_DIR = PROJECT_ROOT / "app" / "static"
 
 
 class Settings(BaseSettings):
@@ -18,7 +20,7 @@ class Settings(BaseSettings):
 
     app_host: str = "0.0.0.0"
     app_port: int = 8000
-    app_debug: bool = True
+    app_debug: bool = False
 
     database_path: str = "data/vault.db"
 
