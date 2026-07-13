@@ -11,6 +11,8 @@ import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 
+from app.config import settings  # noqa: F401  # 提供给测试 monkeypatch
+from app.database import get_connection
 from app.models.enums import (
     Difficulty,
     Grade,
@@ -18,6 +20,7 @@ from app.models.enums import (
     ReviewStatus,
     Section,
 )
+from app.models.question import QuestionOut
 
 
 class QuestionNotFoundError(Exception):
@@ -141,3 +144,55 @@ def parse_list_query(params: Mapping[str, list[str]]) -> QuestionListQuery:
         sort=sort,
         page=page,
     )
+
+
+def _build_where_clause(q: QuestionListQuery) -> tuple[str, list]:
+    """构造 WHERE 子句（不包含 1=1）和对应参数。"""
+    clauses: list[str] = []
+    args: list = []
+
+    text_filters: list[tuple[str, list[str]]] = [
+        ("grade", q.grades),
+        ("question_type", q.question_types),
+        ("section", q.sections),
+        ("difficulty", q.difficulties),
+        ("source_abbr", q.source_abbrs),
+        ("review_status", q.review_statuses),
+        ("topic_l1", q.topic_l1s),
+    ]
+    for param_key, values in text_filters:
+        if not values:
+            continue
+        col, _ = ALLOWED_FILTER_COLUMNS[param_key]
+        placeholders = ",".join("?" * len(values))
+        clauses.append(f"{col} IN ({placeholders})")
+        args.extend(values)
+
+    if q.years:
+        placeholders = ",".join("?" * len(q.years))
+        clauses.append(f"year IN ({placeholders})")
+        args.extend(q.years)
+
+    where_sql = ("WHERE " + " AND ".join(clauses)) if clauses else ""
+    return where_sql, args
+
+
+def list_questions(q: QuestionListQuery) -> tuple[list[QuestionOut], int]:
+    """返回 (本页 rows, 总数)；page 越界返回 ([], total)。"""
+    where_sql, where_args = _build_where_clause(q)
+    order_sql = ALLOWED_SORTS.get(q.sort, ALLOWED_SORTS["year_desc"])
+    offset = (q.page - 1) * q.page_size
+
+    with get_connection() as conn:
+        total = conn.execute(
+            f"SELECT COUNT(*) FROM questions {where_sql}", where_args
+        ).fetchone()[0]
+        if total == 0 or offset >= total:
+            return [], total
+        rows = conn.execute(
+            f"SELECT * FROM questions {where_sql} ORDER BY {order_sql} "
+            f"LIMIT ? OFFSET ?",
+            [*where_args, q.page_size, offset],
+        ).fetchall()
+
+    return [QuestionOut.model_validate(dict(r)) for r in rows], total
