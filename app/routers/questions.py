@@ -1,12 +1,12 @@
 """题目路由：列表 + 详情。
 
 - GET /questions：URL 同步筛选 + 分页 + 排序，HTMX 局部刷新
-- GET /questions/{id}：详情页（404 走全局异常处理）
+- GET /questions/{id}：详情页（404 返回 ``{detail, code}`` 形式 JSON）
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Request
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.templating import Jinja2Templates
 
 from app.config import TEMPLATES_DIR
@@ -32,10 +32,11 @@ def _build_params(request: Request) -> dict[str, list[str]]:
     summary="题目列表（HTMX 局部刷新友好）",
 )
 async def list_questions_view(request: Request) -> HTMLResponse:
-    params = _build_params(request)
-    q = question_service.parse_list_query(params)
-    rows, total = question_service.list_questions(q)
     topic_choices = question_service.list_topic_l1_choices()
+    allowed_topic_l1s = {tid for tid, _ in topic_choices}
+    params = _build_params(request)
+    q = question_service.parse_list_query(params, allowed_topic_l1s=allowed_topic_l1s)
+    rows, total = question_service.list_questions(q)
     is_htmx = request.headers.get("HX-Request") == "true"
 
     ctx = {
@@ -57,11 +58,14 @@ async def list_questions_view(request: Request) -> HTMLResponse:
     response_class=HTMLResponse,
     summary="题目详情",
 )
-async def detail_question_view(request: Request, question_id: str) -> HTMLResponse:
+async def detail_question_view(request: Request, question_id: str) -> Response:
     try:
         q = question_service.get_question_detail(question_id)
-    except question_service.QuestionNotFoundError as err:
-        raise HTTPException(status_code=404, detail="题目不存在") from err
+    except question_service.QuestionNotFoundError:
+        return JSONResponse(
+            status_code=404,
+            content={"detail": "题目不存在", "code": "not_found"},
+        )
     return templates.TemplateResponse(
         "questions/detail.html", {"request": request, "q": q}
     )

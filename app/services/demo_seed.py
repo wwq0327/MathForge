@@ -14,7 +14,6 @@
 """
 from __future__ import annotations
 
-from app.config import settings  # noqa: F401  # 提供给测试 monkeypatch
 from app.database import get_connection
 
 _DEMO_QUESTIONS: list[tuple] = [

@@ -47,6 +47,21 @@ def test_parse_illegal_sort_falls_back():
     assert q.sort == "year_desc"
 
 
+def test_parse_topic_l1_validated_against_knowledge_tree():
+    """传 allowed_topic_l1s 时，非白名单值必须丢弃。"""
+    q = parse_list_query(
+        {"topic_l1": ["kt-num", "kt-bogus", "kt-fig", ""]},
+        allowed_topic_l1s={"kt-num", "kt-fig"},
+    )
+    assert q.topic_l1s == ["kt-num", "kt-fig"]
+
+
+def test_parse_topic_l1_no_whitelist_keeps_nonempty_strings():
+    """不传 allowed_topic_l1s 时，仅做非空字符串校验（向后兼容）。"""
+    q = parse_list_query({"topic_l1": ["kt-num", "kt-bogus", ""]})
+    assert q.topic_l1s == ["kt-num", "kt-bogus"]
+
+
 def test_parse_legal_sort_kept():
     q = parse_list_query({"sort": ["citation_desc"]})
     assert q.sort == "citation_desc"
@@ -106,7 +121,6 @@ def seeded_db(tmp_path, monkeypatch):
 
     test_settings = Settings(database_path=str(db), prompts_dir=str(prompts))
     monkeypatch.setattr("app.database.settings", test_settings)
-    monkeypatch.setattr(question_service, "settings", test_settings)
 
     init_schema(db_path=db)
     with question_service.get_connection() as conn:
@@ -146,7 +160,6 @@ def test_list_questions_empty_db(tmp_path, monkeypatch):
     prompts.mkdir()
     test_settings = Settings(database_path=str(db), prompts_dir=str(prompts))
     monkeypatch.setattr("app.database.settings", test_settings)
-    monkeypatch.setattr(question_service, "settings", test_settings)
     init_schema(db_path=db)
 
     rows, total = question_service.list_questions(question_service.QuestionListQuery())
@@ -341,6 +354,5 @@ def test_list_topic_l1_choices_empty_db(tmp_path, monkeypatch):
     prompts.mkdir()
     test_settings = Settings(database_path=str(db), prompts_dir=str(prompts))
     monkeypatch.setattr("app.database.settings", test_settings)
-    monkeypatch.setattr(question_service, "settings", test_settings)
     init_schema(db_path=db)
     assert question_service.list_topic_l1_choices() == []

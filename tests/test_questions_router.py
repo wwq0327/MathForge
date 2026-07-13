@@ -62,6 +62,14 @@ def test_detail_question_invalid_id_returns_404(client_with_questions):
     assert r.status_code == 404
 
 
+def test_detail_question_404_body_has_code(client_with_questions):
+    """spec 3.2 要求 404 body 形如 {detail, code}。"""
+    r = client_with_questions.get("/questions/M2099-NOPE-1")
+    assert r.status_code == 404
+    body = r.json()
+    assert body == {"detail": "题目不存在", "code": "not_found"}
+
+
 def test_detail_question_back_link(client_with_questions):
     r = client_with_questions.get("/questions/M2024-NCZK-1")
     assert r.status_code == 200

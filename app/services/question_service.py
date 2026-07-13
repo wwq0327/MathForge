@@ -11,9 +11,9 @@ import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 
-from app.config import settings  # noqa: F401  # 提供给测试 monkeypatch
 from app.database import get_connection
 from app.models.enums import (
+    QUESTION_ID_PATTERN,
     Difficulty,
     Grade,
     QuestionType,
@@ -96,14 +96,18 @@ def _clean_source_abbrs(values: list[str]) -> list[str]:
     return [v for v in values if isinstance(v, str) and _SOURCE_ABBR_RE.match(v)]
 
 
-def _coerce_positive_int(value: str | None, default: int) -> int:
-    if not isinstance(value, str):
-        return default
-    try:
-        n = int(value)
-    except ValueError:
-        return default
-    return n if n >= 1 else default
+def _clean_topic_l1s(
+    values: list[str], allowed: set[str] | None
+) -> list[str]:
+    """topic_l1 清洗：非空字符串 + 可选白名单（None 表示跳过校验）。"""
+    out: list[str] = []
+    for v in values:
+        if not isinstance(v, str) or not v:
+            continue
+        if allowed is not None and v not in allowed:
+            continue
+        out.append(v)
+    return out
 
 
 def _pick_positive_int(values: list[str], default: int) -> int:
@@ -120,11 +124,17 @@ def _pick_positive_int(values: list[str], default: int) -> int:
     return default
 
 
-def parse_list_query(params: Mapping[str, list[str]]) -> QuestionListQuery:
+def parse_list_query(
+    params: Mapping[str, list[str]],
+    allowed_topic_l1s: set[str] | None = None,
+) -> QuestionListQuery:
     """解析并校验 query string，非法值丢弃，缺失项用默认。
 
     params 由路由层用 ``request.query_params.getlist(key)`` 显式组装为
     ``dict[str, list[str]]`` 后传入；service 不直接依赖 Starlette 类型。
+
+    ``allowed_topic_l1s`` 来自 ``list_topic_l1_choices()``；不传或传 None
+    时跳过 topic_l1 白名单校验（保留向后兼容，便于 service 层单测）。
     """
     sort = params.get("sort", ["year_desc"])[0] if params.get("sort") else "year_desc"
     if sort not in ALLOWED_SORTS:
@@ -140,7 +150,7 @@ def parse_list_query(params: Mapping[str, list[str]]) -> QuestionListQuery:
         years=_clean_years(params.get("year", [])),
         source_abbrs=_clean_source_abbrs(params.get("source_abbr", [])),
         review_statuses=_clean_text(params.get("review_status", []), "review_status"),
-        topic_l1s=[v for v in params.get("topic_l1", []) if isinstance(v, str) and v],
+        topic_l1s=_clean_topic_l1s(params.get("topic_l1", []), allowed_topic_l1s),
         sort=sort,
         page=page,
     )
@@ -198,7 +208,7 @@ def list_questions(q: QuestionListQuery) -> tuple[list[QuestionOut], int]:
     return [QuestionOut.model_validate(dict(r)) for r in rows], total
 
 
-_QUESTION_ID_RE = re.compile(r"^M\d{4}-[A-Z]+-\d+$")
+_QUESTION_ID_RE = re.compile(QUESTION_ID_PATTERN)
 
 
 def get_question_detail(id: str) -> QuestionOut:

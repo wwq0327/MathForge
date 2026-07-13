@@ -8,14 +8,12 @@ import pytest
 def empty_db(tmp_path, monkeypatch):
     from app.config import Settings
     from app.database import init_schema
-    from app.services import demo_seed
 
     db = tmp_path / "vault.db"
     prompts = tmp_path / "prompts"
     prompts.mkdir()
     test_settings = Settings(database_path=str(db), prompts_dir=str(prompts))
     monkeypatch.setattr("app.database.settings", test_settings)
-    monkeypatch.setattr(demo_seed, "settings", test_settings)
     init_schema(db_path=db)
 
     from app.services import question_service
@@ -36,8 +34,7 @@ def test_seed_demo_questions_returns_count(empty_db):
     from app.services import demo_seed
 
     n = demo_seed.seed_demo_questions()
-    assert n > 0
-    assert n >= 20
+    assert n == len(demo_seed._DEMO_QUESTIONS)
 
 
 def test_seed_demo_questions_idempotent(empty_db):
