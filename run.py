@@ -23,7 +23,6 @@ from app.database import init_schema
 from app.logging_config import configure as configure_logging
 from app.logging_config import get_logger
 
-
 PROJECT_ROOT = Path(__file__).resolve().parent
 configure_logging(log_dir=settings.db_path.parent, level="INFO")
 log = get_logger("run")
