@@ -56,9 +56,11 @@ from app.services.paper_service import latex_escape
 templates.env.filters["latex_escape"] = latex_escape
 install_exception_handlers(app)
 
+from .routers import papers as papers_router  # noqa: E402
 from .routers import questions as questions_router  # noqa: E402
 
 app.include_router(questions_router.router)
+app.include_router(papers_router.router)
 
 
 @app.get("/", response_class=HTMLResponse, tags=["system"], summary="首页")
