@@ -24,6 +24,7 @@ class StatsSummaryResponse(BaseModel):
     passages: int = 0
     knowledge_tree: int = 0
     generated_papers: int = 0
+    cart_items: int = 0
 
 
 def install_exception_handlers(app) -> None:

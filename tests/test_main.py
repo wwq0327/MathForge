@@ -28,6 +28,7 @@ def test_stats_summary_returns_table_counts(client):
     assert "papers" in body
     assert "passages" in body
     assert "generated_papers" in body
+    assert "cart_items" in body
 
 
 def test_health_returns_503_when_db_unavailable(client, monkeypatch):

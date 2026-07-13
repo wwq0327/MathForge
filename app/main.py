@@ -10,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 from .api_schemas import HealthResponse, StatsSummaryResponse, install_exception_handlers
 from .config import STATIC_DIR, TEMPLATES_DIR, settings
 from .database import get_connection
+from .services.cart_middleware import CartSessionMiddleware
 from .logging_config import configure as configure_logging
 from .logging_config import get_logger
 
@@ -33,6 +34,8 @@ if settings.app_debug:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+app.add_middleware(CartSessionMiddleware)
 
 
 @app.middleware("http")

@@ -56,6 +56,7 @@ def test_allowed_tables_match_schema():
         "passages",
         "questions",
         "generated_papers",
+        "cart_items",
     }
     assert ALLOWED_TABLES == expected
 

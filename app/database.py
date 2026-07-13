@@ -30,6 +30,7 @@ ALLOWED_TABLES: frozenset[str] = frozenset(
         "passages",
         "questions",
         "generated_papers",
+        "cart_items",
     }
 )
 
@@ -131,6 +132,16 @@ CREATE TABLE IF NOT EXISTS generated_papers (
     question_ids  TEXT,
     created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 购物车（匿名 session）
+CREATE TABLE IF NOT EXISTS cart_items (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id  TEXT NOT NULL,
+    question_id TEXT NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+    sort_order  INTEGER DEFAULT 0,
+    added_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_cart_session ON cart_items(session_id);
 """
 
 
