@@ -32,6 +32,9 @@ data/uploads/*
 *.swp
 *.swo
 
+# 技能内部状态（subagent-driven-development 进度账本等）
+.superpowers/
+
 # 环境
 .env
 .env.local
