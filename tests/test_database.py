@@ -82,7 +82,6 @@ def test_atomic_write_text_creates_parent_dirs(tmp_path):
 
 def test_atomic_write_text_cleans_tmp_on_failure(tmp_path, monkeypatch):
     target = tmp_path / "out.txt"
-    original_replace = __import__("os").replace
 
     def boom(src, dst):
         raise OSError("simulated disk error")
@@ -95,8 +94,8 @@ def test_atomic_write_text_cleans_tmp_on_failure(tmp_path, monkeypatch):
 
 
 def test_backup_database_creates_file(tmp_db_path, tmp_path, monkeypatch):
-    from app.config import Settings
     from app import database as database_module
+    from app.config import Settings
 
     test_settings = Settings(database_path=str(tmp_db_path))
     monkeypatch.setattr(database_module, "settings", test_settings)

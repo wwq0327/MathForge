@@ -17,19 +17,22 @@ import json
 import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 from app.config import settings  # noqa: E402
-from app.database import ALLOWED_TABLES, SCHEMA_SQL, get_connection, init_schema  # noqa: E402
+from app.database import ALLOWED_TABLES, get_connection, init_schema  # noqa: E402
 from app.logging_config import configure as configure_logging  # noqa: E402
 from app.logging_config import get_logger  # noqa: E402
 
-
-SEED_FILE = settings.prompts_path / "knowledge_tree_seed.json"
-
 configure_logging(log_dir=settings.db_path.parent, level="INFO")
 log = get_logger("init_db")
+
+
+def _seed_file() -> Path:
+    """当前 settings 对应的种子文件路径（运行时计算，方便测试隔离）。"""
+    return settings.prompts_path / "knowledge_tree_seed.json"
 
 
 def reset_database() -> None:
@@ -46,10 +49,12 @@ def reset_database() -> None:
 
 def seed_knowledge_tree() -> int:
     """从种子文件灌入知识点树。返回写入条数。"""
-    if not SEED_FILE.exists():
-        log.warning("种子文件不存在: %s，跳过", SEED_FILE)
+    seed_path = _seed_file()
+    if not seed_path.exists():
+        log.warning("种子文件不存在: %s，跳过", seed_path)
         return 0
-    nodes = json.loads(SEED_FILE.read_text(encoding="utf-8"))
+    nodes = json.loads(seed_path.read_text(encoding="utf-8"))
+    nodes = json.loads(seed_path.read_text(encoding="utf-8"))
     if not isinstance(nodes, list):
         raise ValueError("种子文件根节点必须是数组")
 

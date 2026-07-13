@@ -16,11 +16,12 @@ import argparse
 import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(PROJECT_ROOT))
+import uvicorn
 
-from app.config import settings  # noqa: E402
-from app.database import init_schema  # noqa: E402
+from app.config import settings
+from app.database import init_schema
+
+PROJECT_ROOT = Path(__file__).resolve().parent
 
 
 def ensure_dependencies() -> None:
@@ -64,7 +65,6 @@ def main() -> None:
     if not args.no_init:
         ensure_database()
 
-    import uvicorn
     print(f"\n[run] MathForge 启动 → http://{args.host}:{args.port}\n")
     uvicorn.run(
         "app.main:app",

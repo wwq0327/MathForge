@@ -27,7 +27,7 @@ class TestQuestionId:
         with pytest.raises(ValidationError):
             QuestionCreate(id="M24-NCZK-001")
 
-    def test_no_M_prefix_rejected(self):
+    def test_no_m_prefix_rejected(self):
         with pytest.raises(ValidationError):
             QuestionCreate(id="2024-NCZK-001")
 
@@ -59,7 +59,7 @@ class TestPassageId:
         with pytest.raises(ValidationError):
             PassageCreate(id="2024-NCZK")
 
-    def test_M_prefix_rejected(self):
+    def test_m_prefix_rejected(self):
         with pytest.raises(ValidationError):
             PassageCreate(id="M2024-NCZK-001")
 
