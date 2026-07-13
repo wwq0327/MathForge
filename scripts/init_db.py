@@ -54,7 +54,6 @@ def seed_knowledge_tree() -> int:
         log.warning("种子文件不存在: %s，跳过", seed_path)
         return 0
     nodes = json.loads(seed_path.read_text(encoding="utf-8"))
-    nodes = json.loads(seed_path.read_text(encoding="utf-8"))
     if not isinstance(nodes, list):
         raise ValueError("种子文件根节点必须是数组")
 
