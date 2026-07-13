@@ -6,13 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-
 from .api_schemas import HealthResponse, StatsSummaryResponse, install_exception_handlers
-from .config import STATIC_DIR, TEMPLATES_DIR, settings, templates
+from .config import STATIC_DIR, settings, templates
 from .database import get_connection
-from .services.cart_middleware import CartSessionMiddleware
 from .logging_config import configure as configure_logging
 from .logging_config import get_logger
+from .services.cart_middleware import CartSessionMiddleware
 
 configure_logging(log_dir=settings.db_path.parent, level="DEBUG" if settings.app_debug else "INFO")
 log = get_logger("main")
