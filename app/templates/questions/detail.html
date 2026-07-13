@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ q.id }} · {{ q.question_type or '题目' }} · MathForge{% endblock %}
+{% block content %}
+<nav class="text-sm text-slate-500 mb-4">
+  <a href="/questions" class="hover:text-slate-900">← 返回题库浏览</a>
+</nav>
+<article class="bg-white border border-slate-200 rounded p-6 space-y-6">
+  <header>
+    <h1 class="text-lg font-semibold font-mono">{{ q.id }}</h1>
+    <p class="text-sm text-slate-500 mt-1">
+      {{ q.question_type or '—' }} · {{ q.difficulty or '—' }} · {{ q.year or '—' }} · {{ q.source or '—' }}
+    </p>
+  </header>
+
+  <section>
+    <h2 class="text-base font-semibold mb-2">题干</h2>
+    <div class="prose prose-slate max-w-none">{{ q.stem or '（无）' }}</div>
+  </section>
+  <section>
+    <h2 class="text-base font-semibold mb-2">答案</h2>
+    <div class="prose prose-slate max-w-none">{{ q.answer or '（无）' }}</div>
+  </section>
+  <section>
+    <h2 class="text-base font-semibold mb-2">解析</h2>
+    <div class="prose prose-slate max-w-none">{{ q.solution or '（无）' }}</div>
+  </section>
+
+  <section>
+    <h2 class="text-base font-semibold mb-2">元数据</h2>
+    <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+      {% set rows = [
+        ("学段", q.stage), ("年级", q.grade), ("板块", q.section),
+        ("知识点 l1", q.topic_l1), ("知识点 l2", q.topic_l2),
+        ("考查角度", q.angle), ("来源", q.source), ("来源缩写", q.source_abbr),
+        ("年份", q.year), ("是否真题", "是" if q.is_exam_question else "否"),
+        ("审核状态", q.review_status), ("题号", q.question_number), ("分值", q.score),
+        ("引用次数", q.citation_count), ("关联试卷", q.paper_id), ("关联大题", q.passage_id),
+      ] %}
+      {% for label, val in rows %}
+      <div class="flex">
+        <dt class="w-28 text-slate-500">{{ label }}</dt>
+        <dd class="flex-1">{{ val if val is not none else '—' }}</dd>
+      </div>
+      {% endfor %}
+      <div class="flex">
+        <dt class="w-28 text-slate-500">核心素养</dt>
+        <dd class="flex-1">{{ q.core_literacy or '—' }}</dd>
+      </div>
+      <div class="flex">
+        <dt class="w-28 text-slate-500">布鲁姆层级</dt>
+        <dd class="flex-1">{{ q.bloom_level or '—' }}</dd>
+      </div>
+    </dl>
+  </section>
+</article>
+{% endblock %}
