@@ -8,10 +8,10 @@ AI 驱动的本地数学题库管理系统。
 
 ## 特性
 
-- **结构化存储**：SQLite + 五张表（题目 / 大题 / 试卷 / 知识树 / 组卷记录）
+- **结构化存储**：SQLite + 五张表（题目 / 大题 / 试卷 / 知识树 / 组卷记录 + cart_items）
 - **AI 辅助**：OCR 文本识别 + LLM 元数据推断（提示词外部化、可热重载）
 - **录入模式**：单题 / 同卷 / 批量 三种
-- **组卷导出**：HTML 即时预览 + LaTeX 专业排版
+- **组卷导出**：HTML 即时预览 + LaTeX `.tex` 文件下载
 - **答案模式**：完整 / 留白 / 固定空白 / 完全隐藏 四档
 - **引用追踪**：每道题被组卷引用自动累加 `citation_count`
 
@@ -26,7 +26,7 @@ AI 驱动的本地数学题库管理系统。
 | AI | OpenAI 兼容 LLM + PaddleOCR |
 | 公式 | KaTeX（渲染）· LaTeX（导出） |
 | 图表 | Chart.js |
-| 排版导出 | Jinja2 → HTML / xelatex → PDF |
+| 排版导出 | Jinja2 → HTML / `.tex` 文件 |
 
 零 Node.js 构建步骤，`python run.py` 一键启动。
 
@@ -56,8 +56,15 @@ python run.py
 | 路径 | 说明 |
 |---|---|
 | `/` | 首页 |
+| `/questions` | 题库浏览（HTMX 筛选 + 详情） |
+| `/papers/new` | 组卷页面（从 cart 选题 + 配置） |
+| `/papers/{id}/preview` | 试卷预览 |
+| `/papers/{id}/export/html` | HTML 打印版下载 |
+| `/papers/{id}/export/latex` | LaTeX `.tex` 下载 |
 | `/health` | 健康检查（DB 异常返回 503） |
 | `/api/stats/summary` | 表行数摘要 |
+| `/api/cart/toggle` | 购物车添加/移除 |
+| `/api/cart/summary` | 购物车状态 |
 | `/docs` | Swagger UI |
 | `/redoc` | ReDoc |
 
@@ -87,7 +94,7 @@ MathForge/
 ├── .backups/                # 数据库自动备份
 ├── scripts/                 # 独立脚本
 │   └── init_db.py
-├── tests/                   # pytest 测试（124 用例 / 97% 覆盖）
+├── tests/                   # pytest 测试（161 用例 / 0 ruff / 0 mypy）
 ├── run.py                   # 一键启动
 ├── requirements.txt
 ├── requirements-dev.txt
@@ -102,7 +109,7 @@ MathForge/
 |---|---|---|
 | P0 | 项目骨架 + SQLite 建表 + 初始脚本 | 完成 |
 | P1 | 浏览筛选 + 题目详情（HTMX 无刷新） | 完成 |
-| P2 | 组卷 + 答案模式 + 导出 HTML/LaTeX | 待开始 |
+| P2 | 组卷 + 答案模式 + 导出 HTML/LaTeX | 完成 |
 | P3 | 统计仪表盘 + 高频考点排行 | 待开始 |
 | P4 | 录入引擎（三种模式 + 审查界面 + OCR 集成） | 待开始 |
 | P5 | 管理后台（单题编辑 + 知识树 + 源文件管理） | 待开始 |
