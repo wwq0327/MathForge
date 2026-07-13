@@ -50,6 +50,10 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR), html=False), name="s
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 install_exception_handlers(app)
 
+from .routers import questions as questions_router  # noqa: E402
+
+app.include_router(questions_router.router)
+
 
 @app.get("/", response_class=HTMLResponse, tags=["system"], summary="首页")
 async def index(request: Request) -> HTMLResponse:

@@ -87,3 +87,42 @@ def client(isolated_settings, monkeypatch):
 
     with TestClient(main_module.app) as c:
         yield c
+
+
+@pytest.fixture
+def client_with_questions(isolated_settings, monkeypatch):
+    """client 的扩展版，自动灌入 4 道覆盖数据。"""
+    from app import config as config_module
+    from app import database as database_module
+    from app import logging_config as logging_module
+    from app import main as main_module
+
+    monkeypatch.setattr(config_module, "settings", isolated_settings)
+    importlib.reload(database_module)
+    importlib.reload(logging_module)
+    importlib.reload(main_module)
+    logging_module.configure(log_dir=isolated_settings.db_path.parent, level="WARNING")
+    database_module.init_schema(db_path=isolated_settings.db_path)
+
+    with database_module.get_connection() as conn:
+        conn.executemany(
+            "INSERT INTO knowledge_tree (id, name) VALUES (?, ?)",
+            [("kt-num", "数与代数"), ("kt-fig", "图形与几何")],
+        )
+        conn.executemany(
+            """INSERT INTO questions (
+                id, stage, grade, question_type, section, source, source_abbr,
+                year, review_status, topic_l1, difficulty, stem, answer, solution
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [
+                ("M2024-NCZK-1", "初中", "七年级", "选择题", "数与代数", "测试A", "NCZK",
+                 2024, "已入库", "kt-num", "易", "题干1", "答案1", "解析1"),
+                ("M2024-NCZK-2", "初中", "七年级", "填空题", "数与代数", "测试A", "NCZK",
+                 2024, "草稿", "kt-num", "中", "题干2", "答案2", "解析2"),
+                ("M2024-BJMS-1", "初中", "八年级", "计算题", "图形与几何", "测试B", "BJMS",
+                 2024, "已入库", "kt-fig", "难", "题干3", "答案3", "解析3"),
+            ],
+        )
+
+    with TestClient(main_module.app) as c:
+        yield c
