@@ -51,6 +51,9 @@ async def add_security_headers(request: Request, call_next):
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR), html=False), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+from app.services.paper_service import latex_escape
+
+templates.env.filters["latex_escape"] = latex_escape
 install_exception_handlers(app)
 
 from .routers import questions as questions_router  # noqa: E402
