@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ project }} — {{ stage }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+  <header class="border-b border-slate-200 bg-white">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold">{{ project }}</h1>
+        <p class="text-sm text-slate-500">{{ stage }} · v{{ version }}</p>
+      </div>
+      <nav class="text-sm text-slate-600 space-x-4">
+        <a href="/" class="hover:text-slate-900">首页</a>
+        <a href="/health" class="hover:text-slate-900">健康检查</a>
+        <a href="/api/stats/summary" class="hover:text-slate-900">统计</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-10">
+    <section class="bg-white rounded-lg border border-slate-200 p-8">
+      <h2 class="text-lg font-semibold mb-3">项目骨架已就位</h2>
+      <p class="text-slate-600 mb-6">
+        本页面由 <code class="px-1 py-0.5 bg-slate-100 rounded">app/main.py</code> 渲染，
+        Tailwind / KaTeX 已通过 CDN 注入，后续阶段在此添加题目浏览、组卷与统计模块。
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <div class="border border-slate-200 rounded p-4">
+          <p class="text-slate-500">数据存储</p>
+          <p class="font-medium">SQLite · vault.db</p>
+        </div>
+        <div class="border border-slate-200 rounded p-4">
+          <p class="text-slate-500">后端框架</p>
+          <p class="font-medium">FastAPI + Jinja2</p>
+        </div>
+        <div class="border border-slate-200 rounded p-4">
+          <p class="text-slate-500">交互栈</p>
+          <p class="font-medium">HTMX + Alpine.js（待接入）</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="max-w-6xl mx-auto px-6 py-6 text-xs text-slate-400">
+    MathForge · 王老师 × AI 协作
+  </footer>
+</body>
+</html>

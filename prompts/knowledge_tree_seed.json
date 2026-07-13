@@ -1,0 +1,44 @@
+[
+  {
+    "id": "sec-number",
+    "name": "数与代数",
+    "code": "数与代数",
+    "sort_order": 1,
+    "description": "数与运算、式与方程、不等式"
+  },
+  {
+    "id": "sec-geometry",
+    "name": "图形与几何",
+    "code": "图形与几何",
+    "sort_order": 2,
+    "description": "图形的性质、变换、坐标"
+  },
+  {
+    "id": "sec-function",
+    "name": "函数",
+    "code": "函数",
+    "sort_order": 3,
+    "description": "函数概念、一次函数、反比例函数、二次函数"
+  },
+  {
+    "id": "sec-stats",
+    "name": "统计与概率",
+    "code": "统计与概率",
+    "sort_order": 4,
+    "description": "数据收集、整理、描述、分析，随机事件与概率"
+  },
+  {
+    "id": "sec-comprehensive",
+    "name": "综合与实践",
+    "code": "综合与实践",
+    "sort_order": 5,
+    "description": "跨学科、真实情境问题"
+  },
+  {
+    "id": "sec-project",
+    "name": "课题学习",
+    "code": "课题学习",
+    "sort_order": 6,
+    "description": "长周期项目式学习"
+  }
+]

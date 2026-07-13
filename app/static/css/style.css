@@ -1,0 +1,9 @@
+/* MathForge 公共样式 */
+:root {
+  --color-accent: #2563eb;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.875em;
+}

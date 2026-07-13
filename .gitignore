@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 应用数据
+data/vault.db
+data/vault.db-journal
+data/vault.db-wal
+data/vault.db-shm
+data/uploads/*
+!data/uploads/.gitkeep
+
+# 备份
+.backups/*
+!.backups/.gitkeep
+
+# 编辑器
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+
+# 环境
+.env
+.env.local
+*.log
+log.csv
+
+# 原始试卷（按需）
+raw/*
+!raw/.gitkeep
+
+# 导出文件（按需）
+outputs/*
+!outputs/.gitkeep
