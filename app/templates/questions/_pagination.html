@@ -1,0 +1,29 @@
+{# 分页片段。URL 保留当前所有筛选参数。 #}
+{% set qs = [] %}
+{% for key, values in params.items() %}
+  {% for v in values %}
+    {% set _ = qs.append("~s=%s&%s=%s" % ('', key, v)) %}
+  {% endfor %}
+{% endfor %}
+{% set raw = qs | join('&') %}
+{# raw 形如 "&grade=七年级&grade=八年级" #}
+{% set prev_q = raw %}
+{% set next_q = raw %}
+
+<div class="flex justify-between items-center mt-3 text-xs text-slate-500">
+  <a href="/questions?page=1{{ prev_q }}"
+     class="px-2 py-1 border border-slate-200 rounded hover:bg-slate-50">首页</a>
+  <div>
+    {% if query.page > 1 %}
+    <a href="/questions?page={{ query.page - 1 }}{{ prev_q }}"
+       class="px-2 py-1 border border-slate-200 rounded hover:bg-slate-50">上一页</a>
+    {% endif %}
+    <span class="mx-2">{{ query.page }} / {{ page_total }}</span>
+    {% if query.page < page_total %}
+    <a href="/questions?page={{ query.page + 1 }}{{ next_q }}"
+       class="px-2 py-1 border border-slate-200 rounded hover:bg-slate-50">下一页</a>
+    {% endif %}
+  </div>
+  <a href="/questions?page={{ page_total }}{{ next_q }}"
+     class="px-2 py-1 border border-slate-200 rounded hover:bg-slate-50">末页</a>
+</div>

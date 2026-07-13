@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}题库浏览 · MathForge{% endblock %}
+{% block content %}
+<h1 class="text-xl font-semibold mb-6">题库浏览</h1>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+  <aside class="md:col-span-1 bg-white border border-slate-200 rounded p-4">
+    {% include "questions/_filters.html" %}
+  </aside>
+  <section class="md:col-span-3">
+    <div id="q-table"
+         hx-get="/questions" hx-trigger="load once" hx-swap="outerHTML">
+      {% include "questions/_table.html" %}
+    </div>
+  </section>
+</div>
+{% endblock %}

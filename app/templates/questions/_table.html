@@ -1,0 +1,41 @@
+{# 表格片段，被 HTMX 刷入 #q-table。行点击跳详情。 #}
+<div id="q-table">
+  <div class="text-xs text-slate-500 mb-2">共 {{ total }} 条 · 第 {{ query.page }} / {{ page_total }} 页</div>
+  <div class="overflow-x-auto border border-slate-200 rounded">
+    <table class="min-w-full text-sm">
+      <thead class="bg-slate-50 text-slate-500">
+        <tr>
+          <th class="px-3 py-2 text-left">ID</th>
+          <th class="px-3 py-2 text-left">题型</th>
+          <th class="px-3 py-2 text-left">难度</th>
+          <th class="px-3 py-2 text-left">年级</th>
+          <th class="px-3 py-2 text-left">板块</th>
+          <th class="px-3 py-2 text-left">年份</th>
+          <th class="px-3 py-2 text-left">来源</th>
+          <th class="px-3 py-2 text-right">引用</th>
+          <th class="px-3 py-2 text-left">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if rows %}
+        {% for q in rows %}
+        <tr style="cursor:pointer" onclick="window.location='/questions/{{ q.id }}'" class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono text-xs">{{ q.id }}</td>
+          <td class="px-3 py-2">{{ q.question_type or '—' }}</td>
+          <td class="px-3 py-2">{{ q.difficulty or '—' }}</td>
+          <td class="px-3 py-2">{{ q.grade or '—' }}</td>
+          <td class="px-3 py-2">{{ q.section or '—' }}</td>
+          <td class="px-3 py-2">{{ q.year or '—' }}</td>
+          <td class="px-3 py-2">{{ q.source or '—' }}</td>
+          <td class="px-3 py-2 text-right">{{ q.citation_count }}</td>
+          <td class="px-3 py-2"><a href="/questions/{{ q.id }}" class="text-blue-600 hover:underline">查看</a></td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr><td colspan="9" class="px-3 py-6 text-center text-slate-400">无匹配题目</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+  {% include "questions/_pagination.html" %}
+</div>
