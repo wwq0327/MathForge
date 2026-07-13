@@ -13,6 +13,7 @@ from .enums import (
     Section,
     Stage,
 )
+from .types import JsonListStr
 
 
 class QuestionBase(BaseModel):
@@ -34,13 +35,13 @@ class QuestionBase(BaseModel):
     topic_l1: str | None = None
     topic_l2: str | None = None
     angle: str | None = None
-    core_literacy: str | None = None
+    core_literacy: JsonListStr | None = None
     difficulty: Difficulty | None = None
     bloom_level: BloomLevel | None = None
     stem: str | None = None
     answer: str | None = None
     solution: str | None = None
-    images: str | None = None
+    images: JsonListStr | None = None
     passage_id: str | None = None
     paper_id: str | None = None
     question_number: int | None = Field(default=None, ge=1, le=200)

@@ -16,6 +16,16 @@
     <h2 class="text-base font-semibold mb-2">题干</h2>
     <div class="prose prose-slate max-w-none">{% if q.stem %}{{ q.stem|safe }}{% else %}（无）{% endif %}</div>
   </section>
+  {% if q.images and q.images.list %}
+  <section>
+    <h2 class="text-base font-semibold mb-2">配图</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {% for src in q.images.list %}
+      <img src="{{ src }}" alt="题目配图" class="border border-slate-200 rounded max-w-full">
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
   <section>
     <h2 class="text-base font-semibold mb-2">答案</h2>
     <div class="prose prose-slate max-w-none">{% if q.answer %}{{ q.answer|safe }}{% else %}（无）{% endif %}</div>
@@ -44,7 +54,9 @@
       {% endfor %}
       <div class="flex">
         <dt class="w-28 text-slate-500">核心素养</dt>
-        <dd class="flex-1">{{ q.core_literacy or '—' }}</dd>
+        <dd class="flex-1">
+          {% if q.core_literacy and q.core_literacy.list %}{{ q.core_literacy.list | join('、') }}{% else %}—{% endif %}
+        </dd>
       </div>
       <div class="flex">
         <dt class="w-28 text-slate-500">布鲁姆层级</dt>

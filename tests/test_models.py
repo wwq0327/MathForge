@@ -8,6 +8,7 @@ from app.models.enums import Difficulty, QuestionType, ReviewStatus
 from app.models.paper import PaperCreate
 from app.models.passage import PassageCreate
 from app.models.question import QuestionCreate
+from app.models.types import JsonListStr
 
 
 class TestQuestionId:
@@ -117,3 +118,61 @@ class TestFromAttributes:
             }
         )
         assert q.id == "M2024-NCZK-001"
+
+
+class TestJsonListStrFields:
+    """JsonListStr 接入 model 字段的端到端测试（#26）。"""
+
+    def test_images_from_json_string(self):
+        q = QuestionCreate(
+            id="M2024-NCZK-001",
+            images='["img1.png", "img2.png"]',
+        )
+        assert isinstance(q.images, JsonListStr)
+        assert q.images.list == ["img1.png", "img2.png"]
+
+    def test_images_from_list_via_from_list(self):
+        imgs = JsonListStr.from_list(["a.png", "b.png"])
+        q = QuestionCreate(id="M2024-NCZK-001", images=imgs)
+        assert q.images.list == ["a.png", "b.png"]
+
+    def test_images_none(self):
+        q = QuestionCreate(id="M2024-NCZK-001")
+        assert q.images is None
+
+    def test_images_invalid_json_rejected(self):
+        with pytest.raises(ValidationError):
+            QuestionCreate(
+                id="M2024-NCZK-001", images="not json"
+            )
+
+    def test_images_not_array_rejected(self):
+        with pytest.raises(ValidationError):
+            QuestionCreate(
+                id="M2024-NCZK-001", images='{"key": "value"}'
+            )
+
+    def test_images_non_string_element_rejected(self):
+        with pytest.raises(ValidationError):
+            QuestionCreate(
+                id="M2024-NCZK-001", images='["ok", 123]'
+            )
+
+    def test_core_literacy_from_json(self):
+        q = QuestionCreate(
+            id="M2024-NCZK-001",
+            core_literacy='["数学运算", "直观想象"]',
+        )
+        assert q.core_literacy.list == ["数学运算", "直观想象"]
+
+    def test_from_dict_preserves_jsonliststr(self):
+        """从 sqlite.Row 来的 dict 应正确解析为 JsonListStr。"""
+        q = QuestionCreate.model_validate(
+            {
+                "id": "M2024-NCZK-001",
+                "images": '["x.png"]',
+                "core_literacy": '["核心素养1"]',
+            }
+        )
+        assert q.images.list == ["x.png"]
+        assert q.core_literacy.list == ["核心素养1"]
