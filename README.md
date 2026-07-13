@@ -85,12 +85,12 @@ MathForge/
 ├── .backups/                # 数据库自动备份
 ├── scripts/                 # 独立脚本
 │   └── init_db.py
-├── tests/                   # pytest 测试（49 用例 / 97% 覆盖）
+├── tests/                   # pytest 测试（75 用例 / 97% 覆盖）
 ├── run.py                   # 一键启动
 ├── requirements.txt
 ├── requirements-dev.txt
 ├── PLAN.md                  # 建设方案
-├── CLAUDE.md                # 项目级 AI 协作规则
+├── AGENTS.md                # 项目级 AI 协作规则
 └── .env.example
 ```
 
