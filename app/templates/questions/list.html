@@ -7,8 +7,7 @@
     {% include "questions/_filters.html" %}
   </aside>
   <section class="md:col-span-3">
-    <div id="q-table"
-         hx-get="/questions" hx-trigger="load once" hx-swap="outerHTML">
+    <div id="q-table">
       {% include "questions/_table.html" %}
     </div>
   </section>

@@ -1,6 +1,5 @@
 {# 表格片段，被 HTMX 刷入 #q-table。行点击跳详情。 #}
-<div id="q-table">
-  <div class="text-xs text-slate-500 mb-2">共 {{ total }} 条 · 第 {{ query.page }} / {{ page_total }} 页</div>
+<div class="text-xs text-slate-500 mb-2">共 {{ total }} 条 · 第 {{ query.page }} / {{ page_total }} 页</div>
   <div class="overflow-x-auto border border-slate-200 rounded">
     <table class="min-w-full text-sm">
       <thead class="bg-slate-50 text-slate-500">
@@ -38,4 +37,3 @@
     </table>
   </div>
   {% include "questions/_pagination.html" %}
-</div>

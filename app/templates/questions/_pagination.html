@@ -2,7 +2,7 @@
 {% set qs = [] %}
 {% for key, values in params.items() %}
   {% for v in values %}
-    {% set _ = qs.append("~s=%s&%s=%s" % ('', key, v)) %}
+    {% set _ = qs.append("&%s=%s" % (key, v)) %}
   {% endfor %}
 {% endfor %}
 {% set raw = qs | join('&') %}
