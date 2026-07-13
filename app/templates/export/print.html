@@ -41,6 +41,8 @@
       <div class="solution-space"></div>
     {% elif answer_mode == 2 %}
       <div class="page-break"></div>
+    {% elif answer_mode == 3 %}
+      {# 完全隐藏模式：仅题干 #}
     {% endif %}
   </div>
   {% endfor %}
@@ -48,7 +50,7 @@
   <div class="no-print" style="margin-top: 2em; padding-top: 1em; border-top: 1px solid #ccc;">
     <p style="text-align: center;">
       <a href="#" onclick="window.print();return false;" style="color: #4f46e5;">打印</a>
-      {% if paper.answer_mode == 0 %}
+      {% if answer_mode == 0 %}
       · <a href="/papers/{{ paper.id }}/export/latex" style="color: #4f46e5;">下载 LaTeX</a>
       {% endif %}
     </p>

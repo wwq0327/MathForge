@@ -3,6 +3,8 @@
 \usepackage{amsmath,amssymb,geometry,enumitem}
 \geometry{left=2cm,right=2cm,top=2.5cm,bottom=2.5cm}
 
+\newenvironment{solution}{\par\noindent\textbf{解析：}\par}{\par}
+
 \title{ {{ paper.title }} }
 \date{}
 \begin{document}
@@ -27,6 +29,8 @@
 \vspace{5cm}
 {% elif answer_mode == 2 %}
 \newpage
+{% elif answer_mode == 3 %}
+% mode 3: 完全隐藏，仅题干
 {% endif %}
 
 {% endfor %}
