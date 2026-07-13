@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ q.id }} · {{ q.question_type or '题目' }} · MathForge{% endblock %}
+{% block title %}{{ q.id }} · {{ q.question_type or '题目' }} · {{ q.difficulty or '—' }} · MathForge{% endblock %}
 {% block content %}
 <nav class="text-sm text-slate-500 mb-4">
   <a href="/questions" class="hover:text-slate-900">← 返回题库浏览</a>
@@ -14,15 +14,15 @@
 
   <section>
     <h2 class="text-base font-semibold mb-2">题干</h2>
-    <div class="prose prose-slate max-w-none">{{ q.stem or '（无）' }}</div>
+    <div class="prose prose-slate max-w-none">{% if q.stem %}{{ q.stem|safe }}{% else %}（无）{% endif %}</div>
   </section>
   <section>
     <h2 class="text-base font-semibold mb-2">答案</h2>
-    <div class="prose prose-slate max-w-none">{{ q.answer or '（无）' }}</div>
+    <div class="prose prose-slate max-w-none">{% if q.answer %}{{ q.answer|safe }}{% else %}（无）{% endif %}</div>
   </section>
   <section>
     <h2 class="text-base font-semibold mb-2">解析</h2>
-    <div class="prose prose-slate max-w-none">{{ q.solution or '（无）' }}</div>
+    <div class="prose prose-slate max-w-none">{% if q.solution %}{{ q.solution|safe }}{% else %}（无）{% endif %}</div>
   </section>
 
   <section>
