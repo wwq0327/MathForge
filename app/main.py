@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -22,6 +23,28 @@ app = FastAPI(
     version="0.1.0",
     debug=settings.app_debug,
 )
+
+
+if settings.app_debug:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:8000", "http://127.0.0.1:8000"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """基础安全响应头。"""
+    response = await call_next(request)
+    if request.url.path.startswith("/static") or request.url.path in {"/docs", "/redoc"}:
+        return response
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    return response
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR), html=False), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
