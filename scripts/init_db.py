@@ -3,12 +3,15 @@
 执行内容：
 1. 建表（knowledge_tree / papers / passages / questions / generated_papers）
 2. （可选）从 prompts/knowledge_tree_seed.json 灌入知识树种子
-3. 打印建表结果与表行数
+3. （可选）灌入约 25 道示例题到 questions 表
+4. 打印建表结果与表行数
 
 用法：
     python scripts/init_db.py                # 仅建表
     python scripts/init_db.py --seed         # 建表 + 灌入知识树种子
+    python scripts/init_db.py --demo         # 建表 + 灌入示例题（不重建库）
     python scripts/init_db.py --reset --yes  # 删除旧库后重建（需 --yes 确认）
+    python scripts/init_db.py --reset --yes --demo  # 重建库 + 灌入示例题
 """
 from __future__ import annotations
 
@@ -105,6 +108,7 @@ def main() -> None:
         help="配合 --reset，跳过交互确认（脚本化场景使用）",
     )
     parser.add_argument("--seed", action="store_true", help="灌入知识树种子")
+    parser.add_argument("--demo", action="store_true", help="灌入示例题种子（约 25 道）")
     args = parser.parse_args()
 
     if args.reset:
@@ -119,6 +123,12 @@ def main() -> None:
 
     if args.seed:
         seed_knowledge_tree()
+
+    if args.demo:
+        from app.services.demo_seed import seed_demo_questions
+
+        n = seed_demo_questions()
+        log.info("示例题已写入 %d 条", n)
 
     show_tables()
     log.info("数据库初始化完成")

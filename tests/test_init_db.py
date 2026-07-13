@@ -117,3 +117,22 @@ def test_main_reset_requires_yes_flag(tmp_path, monkeypatch, caplog):
             init_db_module.main()
     assert exc.value.code == 2
     assert "--yes" in caplog.text
+
+
+def test_main_demo_seeds_questions(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr("sys.argv", ["init_db.py", "--reset", "--yes", "--demo"])
+    from app.config import Settings
+    from scripts import init_db as init_db_module
+    test_settings = Settings(
+        database_path=str(tmp_path / "vault.db"),
+        prompts_dir=str(tmp_path / "prompts"),
+    )
+    (tmp_path / "prompts").mkdir()
+    monkeypatch.setattr(init_db_module, "settings", test_settings)
+    monkeypatch.setattr("app.database.settings", test_settings)
+
+    init_db_module.main()
+    from app.services import question_service
+    with question_service.get_connection() as conn:
+        n = conn.execute("SELECT COUNT(*) FROM questions").fetchone()[0]
+    assert n > 0
