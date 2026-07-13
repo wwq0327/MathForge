@@ -234,11 +234,12 @@ def seed_demo_questions() -> int:
         conn.executemany(
             """
             INSERT INTO questions (
-                id, stage, grade, question_type, section, source, source_abbr,
-                year, review_status, topic_l1, difficulty, stem, answer, solution,
-                citation_count
-            ) VALUES (?, '初中', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                id, grade, question_type, section, source, source_abbr,
+                year, review_status, topic_l1, difficulty, citation_count,
+                stem, answer, solution
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             _DEMO_QUESTIONS,
         )
+        conn.execute("UPDATE questions SET stage = '初中' WHERE stage IS NULL")
     return len(_DEMO_QUESTIONS)
