@@ -1,5 +1,7 @@
 # MathForge
 
+![CI](https://github.com/wwq0327/MathForge/actions/workflows/ci.yml/badge.svg)
+
 AI 驱动的本地数学题库管理系统。
 
 初中数学题库 · 数据库存储 · AI 辅助 OCR/LLM · 人机协作审查。
