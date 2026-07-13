@@ -1,8 +1,6 @@
 """统一 API 响应与错误结构。"""
 from __future__ import annotations
 
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
 
@@ -30,7 +28,7 @@ class StatsSummaryResponse(BaseModel):
 
 def install_exception_handlers(app) -> None:
     """为 FastAPI app 安装统一异常处理器。"""
-    from fastapi import FastAPI, Request, status
+    from fastapi import Request, status
     from fastapi.exceptions import RequestValidationError
     from fastapi.responses import JSONResponse
 

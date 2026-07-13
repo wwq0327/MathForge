@@ -7,11 +7,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from .api_schemas import HealthResponse, StatsSummaryResponse, install_exception_handlers
-from .config import PROJECT_ROOT, STATIC_DIR, TEMPLATES_DIR, settings
+from .config import STATIC_DIR, TEMPLATES_DIR, settings
 from .database import get_connection
 from .logging_config import configure as configure_logging
 from .logging_config import get_logger
-
 
 configure_logging(log_dir=settings.db_path.parent, level="DEBUG" if settings.app_debug else "INFO")
 log = get_logger("main")

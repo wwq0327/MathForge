@@ -12,7 +12,6 @@ from pathlib import Path
 from ..config import settings
 from ..logging_config import get_logger
 
-
 log = get_logger("prompts")
 
 

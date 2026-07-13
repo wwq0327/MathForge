@@ -30,7 +30,7 @@ class JsonListStr(str):
         return json.loads(self)
 
     @classmethod
-    def from_list(cls, items: list[str]) -> "JsonListStr":
+    def from_list(cls, items: list[str]) -> JsonListStr:
         """从列表构造（自动序列化）。"""
         return cls(json.dumps(items, ensure_ascii=False))
 
@@ -44,7 +44,7 @@ class JsonListStr(str):
         )
 
     @classmethod
-    def _validate(cls, value: str) -> "JsonListStr":
+    def _validate(cls, value: str) -> JsonListStr:
         if not isinstance(value, str):
             raise TypeError(f"JsonListStr 须为 str，得到 {type(value).__name__}")
         try:

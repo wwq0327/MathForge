@@ -14,16 +14,14 @@
 from __future__ import annotations
 
 import os
-import shutil
 import sqlite3
 import tempfile
+from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Iterator
 
 from .config import settings
-
 
 ALLOWED_TABLES: frozenset[str] = frozenset(
     {
