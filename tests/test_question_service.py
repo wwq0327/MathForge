@@ -297,3 +297,50 @@ def test_list_questions_safety_sql_injection_attempt(seeded_db):
     assert total == 0
     with question_service.get_connection() as conn:
         assert conn.execute("SELECT COUNT(*) FROM questions").fetchone()[0] == 4
+
+
+def test_get_question_detail_found(seeded_db):
+    from app.services import question_service
+
+    q = question_service.get_question_detail("M2024-NCZK-1")
+    assert q.id == "M2024-NCZK-1"
+    assert q.stem == "题干1"
+    assert q.grade == "七年级"
+
+
+def test_get_question_detail_not_found_raises(seeded_db):
+    from app.services import question_service
+
+    with pytest.raises(question_service.QuestionNotFoundError):
+        question_service.get_question_detail("M2099-NOPE-1")
+
+
+def test_get_question_detail_invalid_id_raises(seeded_db):
+    from app.services import question_service
+
+    with pytest.raises(question_service.QuestionNotFoundError):
+        question_service.get_question_detail("not-a-valid-id")
+
+
+def test_list_topic_l1_choices(seeded_db):
+    from app.services import question_service
+
+    choices = question_service.list_topic_l1_choices()
+    assert ("kt-num", "数与代数") in choices
+    assert ("kt-fig", "图形与几何") in choices
+    assert len(choices) == 2
+
+
+def test_list_topic_l1_choices_empty_db(tmp_path, monkeypatch):
+    from app.config import Settings
+    from app.database import init_schema
+    from app.services import question_service
+
+    db = tmp_path / "vault.db"
+    prompts = tmp_path / "prompts"
+    prompts.mkdir()
+    test_settings = Settings(database_path=str(db), prompts_dir=str(prompts))
+    monkeypatch.setattr("app.database.settings", test_settings)
+    monkeypatch.setattr(question_service, "settings", test_settings)
+    init_schema(db_path=db)
+    assert question_service.list_topic_l1_choices() == []

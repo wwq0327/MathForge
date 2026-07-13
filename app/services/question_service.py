@@ -196,3 +196,27 @@ def list_questions(q: QuestionListQuery) -> tuple[list[QuestionOut], int]:
         ).fetchall()
 
     return [QuestionOut.model_validate(dict(r)) for r in rows], total
+
+
+_QUESTION_ID_RE = re.compile(r"^M\d{4}-[A-Z]+-\d+$")
+
+
+def get_question_detail(id: str) -> QuestionOut:
+    """返回题目详情；不存在或 ID 不合法均抛 QuestionNotFoundError。"""
+    if not isinstance(id, str) or not _QUESTION_ID_RE.match(id):
+        raise QuestionNotFoundError(id)
+    with get_connection() as conn:
+        row = conn.execute("SELECT * FROM questions WHERE id = ?", (id,)).fetchone()
+    if row is None:
+        raise QuestionNotFoundError(id)
+    return QuestionOut.model_validate(dict(row))
+
+
+def list_topic_l1_choices() -> list[tuple[str, str]]:
+    """返回 (id, name) 列表，仅 parent_id IS NULL 的顶层节点。"""
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT id, name FROM knowledge_tree "
+            "WHERE parent_id IS NULL ORDER BY sort_order, name"
+        ).fetchall()
+    return [(r["id"], r["name"]) for r in rows]
