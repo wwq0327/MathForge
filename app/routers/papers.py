@@ -1,8 +1,6 @@
 """组卷路由：cart API + 生成/预览/导出页面。"""
 from __future__ import annotations
 
-import json
-
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
