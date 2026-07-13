@@ -19,7 +19,7 @@ class QuestionBase(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         str_strip_whitespace=True,
-        use_enum_values=False,
+        use_enum_values=True,
     )
 
     stage: Stage | None = None

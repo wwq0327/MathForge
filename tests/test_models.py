@@ -69,11 +69,13 @@ class TestEnums:
         q = QuestionCreate(
             id="M2024-NCZK-001", question_type=QuestionType.CALCULATION
         )
-        assert q.question_type is QuestionType.CALCULATION
+        # use_enum_values=True：模型存 .value 字符串
+        assert q.question_type == QuestionType.CALCULATION.value
 
     def test_difficulty_enum(self):
         q = QuestionCreate(id="M2024-NCZK-001", difficulty=Difficulty.HARD)
-        assert q.difficulty is Difficulty.HARD
+        # use_enum_values=True：模型存 .value 字符串
+        assert q.difficulty == Difficulty.HARD.value
 
     def test_invalid_enum_value_rejected(self):
         with pytest.raises(ValidationError):
