@@ -114,7 +114,9 @@ def generate_paper(
             "VALUES (?, ?, ?, ?)",
             (title, answer_mode, format, json.dumps(question_ids)),
         )
-        paper_id = cur.lastrowid
+        _pid = cur.lastrowid
+        assert _pid is not None
+        paper_id = _pid
         placeholders = ",".join("?" * len(question_ids))
         conn.execute(
             f"UPDATE questions SET citation_count = citation_count + 1 "

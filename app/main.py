@@ -12,6 +12,7 @@ from .database import get_connection
 from .logging_config import configure as configure_logging
 from .logging_config import get_logger
 from .services.cart_middleware import CartSessionMiddleware
+from .services.paper_service import latex_escape
 
 configure_logging(log_dir=settings.db_path.parent, level="DEBUG" if settings.app_debug else "INFO")
 log = get_logger("main")
@@ -49,8 +50,6 @@ async def add_security_headers(request: Request, call_next):
     return response
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR), html=False), name="static")
-from app.services.paper_service import latex_escape
-
 templates.env.filters["latex_escape"] = latex_escape
 install_exception_handlers(app)
 

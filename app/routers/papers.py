@@ -2,7 +2,13 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
+from fastapi.responses import (
+    HTMLResponse,
+    JSONResponse,
+    PlainTextResponse,
+    RedirectResponse,
+    Response,
+)
 
 from app.config import templates
 from app.services import paper_service
@@ -96,12 +102,15 @@ async def papers_new(request: Request) -> HTMLResponse:
 async def papers_generate(request: Request) -> RedirectResponse:
     sid = _session_id(request)
     form = await request.form()
-    title = form.get("title", "未命名试卷")
+    title_raw = form.get("title", "未命名试卷")
+    title = title_raw if isinstance(title_raw, str) else "未命名试卷"
+    answer_mode_raw = form.get("answer_mode", 0)
     try:
-        answer_mode = int(form.get("answer_mode", 0))
+        answer_mode = int(answer_mode_raw) if isinstance(answer_mode_raw, str) else 0
     except (ValueError, TypeError):
         answer_mode = 0
-    fmt = form.get("format", "html")
+    fmt_raw = form.get("format", "html")
+    fmt = fmt_raw if isinstance(fmt_raw, str) else "html"
     if fmt not in ("html", "latex"):
         fmt = "html"
     try:
@@ -115,7 +124,7 @@ async def papers_generate(request: Request) -> RedirectResponse:
 
 
 @router.get("/papers/{paper_id}")
-async def papers_result(request: Request, paper_id: int) -> HTMLResponse:
+async def papers_result(request: Request, paper_id: int) -> Response:
     paper = paper_service.get_paper(paper_id)
     if paper is None:
         return JSONResponse(status_code=404, content={"detail": "试卷不存在", "code": "not_found"})
@@ -126,7 +135,7 @@ async def papers_result(request: Request, paper_id: int) -> HTMLResponse:
 
 
 @router.get("/papers/{paper_id}/preview")
-async def papers_preview(request: Request, paper_id: int) -> HTMLResponse:
+async def papers_preview(request: Request, paper_id: int) -> Response:
     paper = paper_service.get_paper(paper_id)
     if paper is None:
         return JSONResponse(status_code=404, content={"detail": "试卷不存在", "code": "not_found"})
@@ -144,7 +153,7 @@ async def papers_preview(request: Request, paper_id: int) -> HTMLResponse:
 
 
 @router.get("/papers/{paper_id}/export/html")
-async def papers_export_html(request: Request, paper_id: int):
+async def papers_export_html(request: Request, paper_id: int) -> Response:
     paper = paper_service.get_paper(paper_id)
     if paper is None:
         return JSONResponse(status_code=404, content={"detail": "试卷不存在", "code": "not_found"})
@@ -167,7 +176,7 @@ async def papers_export_html(request: Request, paper_id: int):
 
 
 @router.get("/papers/{paper_id}/export/latex")
-async def papers_export_latex(request: Request, paper_id: int):
+async def papers_export_latex(request: Request, paper_id: int) -> Response:
     paper = paper_service.get_paper(paper_id)
     if paper is None:
         return JSONResponse(status_code=404, content={"detail": "试卷不存在", "code": "not_found"})
