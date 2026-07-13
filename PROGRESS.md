@@ -5,7 +5,10 @@
 ## 当前状态
 
 **最近完成**：P0 + P1（#1-#22 + R4 实施）— P0 项目骨架与审计打磨，P1 浏览筛选 + 题目详情落地
-**进行中**：P2 规划（组卷 + 答案模式 + 导出 HTML/LaTeX）
+
+**最近完成**：P2 组卷 + 答案模式 + 导出（#29-#35）
+
+**进行中**：P3 规划（统计仪表盘 + 高频考点排行）
 
 ## 阶段完成情况
 
@@ -13,7 +16,7 @@
 |---|---|---|---|---|---|
 | P0 | 项目骨架 + SQLite 建表 + 初始脚本 | ✅ 完成 | 2026-07-13 | 0.5 天 | 75 测试 / 97% 覆盖（审计后修正） |
 | P1 | 浏览筛选 + 题目详情（HTMX） | ✅ 完成 | 2026-07-13 | - | service + router + 4 模板 + 50 测试 |
-| P2 | 组卷 + 答案模式 + 导出 HTML/LaTeX | ⬜ 未开始 | - | - | - |
+| P2 | 组卷 + 答案模式 + 导出 HTML/LaTeX | ✅ 完成 | 2026-07-13 | 1 天 | 161 测试 / 手动验证通过 |
 | P3 | 统计仪表盘 + 高频考点排行 | ⬜ 未开始 | - | - | - |
 | P4 | 录入引擎（三模式 + 审查 + OCR） | ⬜ 未开始 | - | - | - |
 | P5 | 管理后台（编辑 + 知识树 + 源文件） | ⬜ 未开始 | - | - | - |
@@ -44,6 +47,20 @@
 - [x] 测试增量：P0 75 → P1 后 124（+49 用例 / 新增 service + router 覆盖）
 - [x] 详细设计：`docs/superpowers/specs/2026-07-13-p1-browse-detail-design.md`
 
+## P2 详细交付（已完成）
+
+- [x] `app/services/paper_service.py` — 组卷业务（cart CRUD + generate + citation_count + latex_escape）
+- [x] `app/services/cart_middleware.py` — Cart session cookie 中间件
+- [x] `app/routers/papers.py` — 组卷路由（9 个端点：cart API + 生成/预览/导出）
+- [x] 5 个 Jinja2 模板：cart 浮条 / 组卷表单 / 结果页 / HTML 打印 / LaTeX
+- [x] 浏览页 inline 勾选（checkbox + HTMX 浮条实时更新）
+- [x] 4 种答案模式（0-完整 / 1-留白 / 2-固定空白 / 3-完全隐藏）
+- [x] 导出 HTML 打印版 + LaTeX `.tex`（含 `\solution` 环境）
+- [x] `cart_items` 表 + `generated_papers` 引用计数
+- [x] 测试增量：P1 135 → P2 后 161（+26 新测试 / 100% 通过）
+- [x] 详细设计 + 实施计划：`docs/superpowers/specs/2026-07-13-p2-composition-design.md`
+- [x] 手动验证：勾选 → cart → 生成 → 预览 → 下载 全流程通过
+
 ## 阻塞项 / 风险
 
 - **LLM 接入**未配置真实 API Key，P4 录入引擎需先有可用 LLM 才能联调
@@ -52,6 +69,7 @@
 
 ## 工具链
 
-- Python 3.12 · FastAPI 0.115 · Uvicorn 0.34 · Pydantic 2.10 · SQLite 3
-- pytest 8.3 · ruff 0.8 · mypy 1.14
+- Python 3.12 · FastAPI 0.139 · Starlette 1.0.0 · Uvicorn · Pydantic 2.10 · SQLite 3
+- Jinja2 3.1.6 · HTMX 1.9.10 · Tailwind CSS · KaTeX 0.16.11
+- pytest 9.0.3
 - GitHub: https://github.com/wwq0327/MathForge

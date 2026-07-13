@@ -20,7 +20,7 @@ log = get_logger("main")
 app = FastAPI(
     title="MathForge",
     description="AI 驱动的本地数学题库管理系统",
-    version="0.1.0",
+    version="0.2.0",
     debug=settings.app_debug,
 )
 
