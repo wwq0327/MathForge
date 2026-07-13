@@ -3,13 +3,11 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
 
-from app.config import TEMPLATES_DIR
+from app.config import templates
 from app.services import paper_service
 
 router = APIRouter(tags=["papers"])
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
 def _session_id(request: Request) -> str:
@@ -30,7 +28,7 @@ async def cart_toggle(request: Request, question_id: str) -> HTMLResponse:
         paper_service.add_to_cart(sid, question_id)
     count = paper_service.cart_count(sid)
     return templates.TemplateResponse(
-        "papers/_cart_bar.html",
+        request, "papers/_cart_bar.html",
         {"request": request, "count": count},
     )
 
@@ -40,7 +38,7 @@ async def cart_summary(request: Request) -> HTMLResponse:
     sid = _session_id(request)
     count = paper_service.cart_count(sid)
     return templates.TemplateResponse(
-        "papers/_cart_bar.html",
+        request, "papers/_cart_bar.html",
         {"request": request, "count": count},
     )
 
@@ -85,7 +83,7 @@ async def papers_new(request: Request) -> HTMLResponse:
         questions = {}
     cart_questions = [questions.get(item["question_id"]) for item in items if item["question_id"] in questions]
     return templates.TemplateResponse(
-        "papers/new.html",
+        request, "papers/new.html",
         {
             "request": request,
             "items": items,
@@ -122,7 +120,7 @@ async def papers_result(request: Request, paper_id: int) -> HTMLResponse:
     if paper is None:
         return JSONResponse(status_code=404, content={"detail": "试卷不存在", "code": "not_found"})
     return templates.TemplateResponse(
-        "papers/result.html",
+        request, "papers/result.html",
         {"request": request, "paper": paper},
     )
 
@@ -135,7 +133,7 @@ async def papers_preview(request: Request, paper_id: int) -> HTMLResponse:
     questions = paper_service.get_paper_questions(paper_id)
     answer_mode = paper["answer_mode"]
     return templates.TemplateResponse(
-        "export/print.html",
+        request, "export/print.html",
         {
             "request": request,
             "paper": paper,
@@ -153,7 +151,7 @@ async def papers_export_html(request: Request, paper_id: int):
     questions = paper_service.get_paper_questions(paper_id)
     answer_mode = paper["answer_mode"]
     rendered = templates.TemplateResponse(
-        "export/print.html",
+        request, "export/print.html",
         {
             "request": request,
             "paper": paper,
@@ -176,7 +174,7 @@ async def papers_export_latex(request: Request, paper_id: int):
     questions = paper_service.get_paper_questions(paper_id)
     answer_mode = paper["answer_mode"]
     rendered = templates.TemplateResponse(
-        "export/paper.tex.j2",
+        request, "export/paper.tex.j2",
         {
             "request": request,
             "paper": paper,

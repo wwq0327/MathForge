@@ -4,6 +4,7 @@
 """
 from pathlib import Path
 
+from fastapi.templating import Jinja2Templates
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -68,3 +69,6 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# 共享 Jinja2Templates 实例，避免多实例缓存冲突（unhashable type: 'dict'）
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))

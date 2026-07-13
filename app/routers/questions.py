@@ -7,13 +7,16 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
-from fastapi.templating import Jinja2Templates
 
-from app.config import TEMPLATES_DIR
+from app.config import templates
 from app.services import question_service
+from app.services.paper_service import list_cart
 
 router = APIRouter(tags=["questions"])
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+
+def _session_id(request: Request) -> str:
+    return request.state.session_id
 
 
 def _build_params(request: Request) -> dict[str, list[str]]:
@@ -39,6 +42,9 @@ async def list_questions_view(request: Request) -> HTMLResponse:
     rows, total = question_service.list_questions(q)
     is_htmx = request.headers.get("HX-Request") == "true"
 
+    cart_items = list_cart(_session_id(request))
+    cart_qids = {item["question_id"] for item in cart_items}
+
     ctx = {
         "request": request,
         "rows": rows,
@@ -47,10 +53,11 @@ async def list_questions_view(request: Request) -> HTMLResponse:
         "params": params,
         "topic_choices": topic_choices,
         "page_total": (total + q.page_size - 1) // q.page_size if total else 0,
+        "cart_qids": cart_qids,
     }
     if is_htmx:
-        return templates.TemplateResponse("questions/_table.html", ctx)
-    return templates.TemplateResponse("questions/list.html", ctx)
+        return templates.TemplateResponse(request, "questions/_table.html", ctx)
+    return templates.TemplateResponse(request, "questions/list.html", ctx)
 
 
 @router.get(
@@ -67,5 +74,5 @@ async def detail_question_view(request: Request, question_id: str) -> Response:
             content={"detail": "题目不存在", "code": "not_found"},
         )
     return templates.TemplateResponse(
-        "questions/detail.html", {"request": request, "q": q}
+        request, "questions/detail.html", {"request": request, "q": q}
     )

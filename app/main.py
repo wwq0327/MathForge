@@ -5,10 +5,10 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+
 
 from .api_schemas import HealthResponse, StatsSummaryResponse, install_exception_handlers
-from .config import STATIC_DIR, TEMPLATES_DIR, settings
+from .config import STATIC_DIR, TEMPLATES_DIR, settings, templates
 from .database import get_connection
 from .services.cart_middleware import CartSessionMiddleware
 from .logging_config import configure as configure_logging
@@ -50,7 +50,6 @@ async def add_security_headers(request: Request, call_next):
     return response
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR), html=False), name="static")
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 from app.services.paper_service import latex_escape
 
 templates.env.filters["latex_escape"] = latex_escape

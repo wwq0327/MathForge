@@ -4,6 +4,7 @@
     <table class="min-w-full text-sm">
       <thead class="bg-slate-50 text-slate-500">
         <tr>
+          <th class="w-10"></th>
           <th class="px-3 py-2 text-left">ID</th>
           <th class="px-3 py-2 text-left">题型</th>
           <th class="px-3 py-2 text-left">难度</th>
@@ -19,6 +20,16 @@
         {% if rows %}
         {% for q in rows %}
         <tr style="cursor:pointer" onclick="window.location='/questions/{{ q.id }}'" class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2">
+            <input type="checkbox"
+                   class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cart-checkbox"
+                   data-question-id="{{ q.id }}"
+                   {% if q.id in cart_qids %}checked{% endif %}
+                   hx-post="/api/cart/toggle?question_id={{ q.id }}"
+                   hx-target="#cart-bar"
+                   hx-swap="outerHTML"
+                   onclick="event.stopPropagation()">
+          </td>
           <td class="px-3 py-2 font-mono text-xs">{{ q.id }}</td>
           <td class="px-3 py-2">{{ q.question_type or '—' }}</td>
           <td class="px-3 py-2">{{ q.difficulty or '—' }}</td>
@@ -31,7 +42,7 @@
         </tr>
         {% endfor %}
         {% else %}
-        <tr><td colspan="9" class="px-3 py-6 text-center text-slate-400">无匹配题目</td></tr>
+        <tr><td colspan="10" class="px-3 py-6 text-center text-slate-400">无匹配题目</td></tr>
         {% endif %}
       </tbody>
     </table>

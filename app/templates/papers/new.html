@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <h2 class="text-lg font-semibold mb-4">生成试卷</h2>
+
+  {% if not cart_questions %}
+  <div class="bg-white rounded-lg border border-slate-200 p-8 text-center">
+    <p class="text-slate-500 mb-4">购物车为空，请先在题库浏览页选择题目。</p>
+    <a href="/questions" class="text-indigo-600 hover:text-indigo-800">→ 去选题</a>
+  </div>
+  {% else %}
+  <form method="post" action="/papers">
+    <div class="bg-white rounded-lg border border-slate-200 p-6 mb-6">
+      <label class="block mb-2 text-sm font-medium">试卷标题</label>
+      <input type="text" name="title"
+             class="w-full px-3 py-2 border border-slate-300 rounded text-sm"
+             placeholder="例如：2026 九上期中测试" required>
+    </div>
+
+    <div class="bg-white rounded-lg border border-slate-200 p-6 mb-6">
+      <h3 class="text-sm font-medium mb-3">已选题目（{{ cart_questions|length }} 题）</h3>
+      <ol class="space-y-2">
+        {% for q in cart_questions %}
+        <li class="flex items-center gap-3 text-sm text-slate-700">
+          <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-medium">{{ loop.index }}</span>
+          <span class="flex-1 truncate">{{ q.stem|striptags|truncate(80) }}</span>
+          <span class="text-xs text-slate-400">{{ q.question_type }}</span>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    <div class="bg-white rounded-lg border border-slate-200 p-6 mb-6">
+      <h3 class="text-sm font-medium mb-3">答案模式</h3>
+      <div class="space-y-2">
+        <label class="flex items-center gap-2 text-sm">
+          <input type="radio" name="answer_mode" value="0" checked>
+          0 — 完整显示（题干 + 解答 + 答案）
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="radio" name="answer_mode" value="1">
+          1 — 留白篇幅（解答区空白占位，答案隐藏）
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="radio" name="answer_mode" value="2">
+          2 — 固定空白（题后分页占位，答案隐藏）
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="radio" name="answer_mode" value="3">
+          3 — 完全隐藏（仅题干）
+        </label>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg border border-slate-200 p-6 mb-6">
+      <h3 class="text-sm font-medium mb-3">导出格式</h3>
+      <div class="space-y-2">
+        <label class="flex items-center gap-2 text-sm">
+          <input type="radio" name="format" value="html" checked>
+          HTML 打印版（浏览器直接查看/打印）
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="radio" name="format" value="latex">
+          LaTeX（.tex 文件，可自行编译为 PDF）
+        </label>
+      </div>
+    </div>
+
+    <button type="submit"
+            class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors">
+      生成试卷
+    </button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}
