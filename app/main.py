@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from .api_schemas import HealthResponse, StatsSummaryResponse, install_exception_handlers
 from .config import PROJECT_ROOT, STATIC_DIR, TEMPLATES_DIR, settings
 from .database import get_connection
 from .logging_config import configure as configure_logging
@@ -25,15 +26,16 @@ app = FastAPI(
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR), html=False), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+install_exception_handlers(app)
 
 
-@app.get("/", response_class=HTMLResponse, tags=["system"])
+@app.get("/", response_class=HTMLResponse, tags=["system"], summary="首页")
 async def index(request: Request) -> HTMLResponse:
     """首页：当前阶段概览。"""
     return templates.TemplateResponse(
+        request,
         "base.html",
         {
-            "request": request,
             "project": "MathForge",
             "stage": "P0 — 项目骨架",
             "version": app.version,
@@ -41,31 +43,44 @@ async def index(request: Request) -> HTMLResponse:
     )
 
 
-@app.get("/health", tags=["system"])
+@app.get(
+    "/health",
+    response_model=HealthResponse,
+    tags=["system"],
+    summary="健康检查",
+)
 async def health() -> JSONResponse:
     """健康检查：DB 不可读时返回 503，不向客户端泄露错误细节。"""
     try:
         with get_connection() as conn:
             conn.execute("SELECT 1").fetchone()
-    except Exception as exc:  # noqa: BLE001
+    except Exception:
         log.exception("health check failed")
         return JSONResponse(
             status_code=503,
-            content={"status": "degraded", "database": False, "error": "database unavailable"},
-            headers={"X-Error-Reason": "db-unavailable" if str(exc) else ""},
+            content=HealthResponse(
+                status="degraded", database=False, version=app.version
+            ).model_dump(),
         )
     return JSONResponse(
         status_code=200,
-        content={"status": "ok", "database": True, "version": app.version},
+        content=HealthResponse(
+            status="ok", database=True, version=app.version
+        ).model_dump(),
     )
 
 
-@app.get("/api/stats/summary", tags=["system"])
-async def stats_summary() -> dict:
+@app.get(
+    "/api/stats/summary",
+    response_model=StatsSummaryResponse,
+    tags=["stats"],
+    summary="统计摘要",
+)
+async def stats_summary() -> StatsSummaryResponse:
     """统计摘要：表行数。P3 阶段替换为完整仪表盘数据。"""
     from .database import ALLOWED_TABLES
 
-    summary: dict[str, int] = {}
+    summary = StatsSummaryResponse()
     with get_connection() as conn:
         rows = conn.execute(
             "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
@@ -73,5 +88,6 @@ async def stats_summary() -> dict:
         for (name,) in rows:
             if name not in ALLOWED_TABLES:
                 continue
-            summary[name] = conn.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0]
+            count = conn.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0]
+            setattr(summary, name, count)
     return summary
