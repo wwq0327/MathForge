@@ -20,8 +20,13 @@ import uvicorn
 
 from app.config import settings
 from app.database import init_schema
+from app.logging_config import configure as configure_logging
+from app.logging_config import get_logger
+
 
 PROJECT_ROOT = Path(__file__).resolve().parent
+configure_logging(log_dir=settings.db_path.parent, level="INFO")
+log = get_logger("run")
 
 
 def ensure_dependencies() -> None:
@@ -34,23 +39,23 @@ def ensure_dependencies() -> None:
         except ImportError:
             missing.append(module)
     if missing:
-        print(f"[error] 缺少依赖: {', '.join(missing)}")
-        print("请先执行: pip install -r requirements.txt")
+        log.error("缺少依赖: %s", ", ".join(missing))
+        log.error("请先执行: pip install -r requirements.txt")
         sys.exit(1)
 
 
 def ensure_database() -> None:
     """数据库不存在则自动建表 + 灌种子。"""
     if not settings.db_path.exists():
-        print(f"[init] 数据库不存在，开始建表: {settings.db_path}")
+        log.info("数据库不存在，开始建表: %s", settings.db_path)
         init_schema()
         try:
             from scripts.init_db import seed_knowledge_tree
             seed_knowledge_tree()
         except Exception as exc:  # noqa: BLE001
-            print(f"[warn] 知识树种子灌入失败（可忽略）: {exc}")
+            log.warning("知识树种子灌入失败（可忽略）: %s", exc)
     else:
-        print(f"[init] 数据库已存在: {settings.db_path}")
+        log.info("数据库已存在: %s", settings.db_path)
 
 
 def main() -> None:
@@ -65,7 +70,7 @@ def main() -> None:
     if not args.no_init:
         ensure_database()
 
-    print(f"\n[run] MathForge 启动 → http://{args.host}:{args.port}\n")
+    log.info("MathForge 启动 → http://%s:%d", args.host, args.port)
     uvicorn.run(
         "app.main:app",
         host=args.host,
