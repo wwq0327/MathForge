@@ -43,6 +43,7 @@ def test_seed_knowledge_tree_writes_nodes(tmp_path, monkeypatch):
 
     test_settings = Settings(database_path=str(db), prompts_dir=str(prompts))
     monkeypatch.setattr(init_db_module, "settings", test_settings)
+    monkeypatch.setattr("app.database.settings", test_settings)
     init_schema(db_path=db)
 
     count = init_db_module.seed_knowledge_tree()
@@ -60,6 +61,7 @@ def test_seed_knowledge_tree_missing_file_is_noop(tmp_path, monkeypatch):
 
     test_settings = Settings(database_path=str(db), prompts_dir=str(prompts))
     monkeypatch.setattr(init_db_module, "settings", test_settings)
+    monkeypatch.setattr("app.database.settings", test_settings)
     init_schema(db_path=db)
 
     count = init_db_module.seed_knowledge_tree()
@@ -78,6 +80,7 @@ def test_seed_knowledge_tree_rejects_non_array(tmp_path, monkeypatch):
 
     test_settings = Settings(database_path=str(db), prompts_dir=str(prompts))
     monkeypatch.setattr(init_db_module, "settings", test_settings)
+    monkeypatch.setattr("app.database.settings", test_settings)
     init_schema(db_path=db)
 
     with pytest.raises(ValueError, match="数组"):
@@ -98,6 +101,7 @@ def test_seed_knowledge_tree_rejects_node_missing_fields(tmp_path, monkeypatch):
 
     test_settings = Settings(database_path=str(db), prompts_dir=str(prompts))
     monkeypatch.setattr(init_db_module, "settings", test_settings)
+    monkeypatch.setattr("app.database.settings", test_settings)
     init_schema(db_path=db)
 
     with pytest.raises(ValueError, match="id/name"):

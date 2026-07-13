@@ -129,8 +129,13 @@ def test_backup_database_raises_if_source_missing(tmp_path, monkeypatch):
         backup_database(target=tmp_path / "backup.db")
 
 
-def test_backup_database_refuses_overwrite(tmp_db_path, tmp_path):
+def test_backup_database_refuses_overwrite(tmp_db_path, tmp_path, monkeypatch):
     init_schema(db_path=tmp_db_path)
+    from app.config import Settings
+
+    monkeypatch.setattr(
+        "app.database.settings", Settings(database_path=str(tmp_db_path))
+    )
     target = tmp_path / "backup.db"
     target.write_text("existing", encoding="utf-8")
     with pytest.raises(FileExistsError):
