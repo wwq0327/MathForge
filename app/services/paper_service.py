@@ -143,18 +143,42 @@ def get_paper(paper_id: int) -> dict | None:
 
 
 def get_paper_questions(paper_id: int) -> list[dict]:
-    """返回试卷关联的题目列表。"""
-    paper = get_paper(paper_id)
-    if not paper:
-        return []
-    qids = json.loads(paper["question_ids"])
-    if not qids:
-        return []
-    placeholders = ",".join("?" * len(qids))
+    """返回试卷关联的题目列表（按 question_ids 顺序）。"""
     with get_connection() as conn:
+        row = conn.execute(
+            "SELECT * FROM generated_papers WHERE id=?", (paper_id,)
+        ).fetchone()
+        if not row:
+            return []
+        paper = dict(row)
+        qids = json.loads(paper["question_ids"])
+        if not qids:
+            return []
+        placeholders = ",".join("?" * len(qids))
         rows = conn.execute(
             f"SELECT * FROM questions WHERE id IN ({placeholders})",
             qids,
         ).fetchall()
     qmap = {r["id"]: dict(r) for r in rows}
     return [qmap[qid] for qid in qids if qid in qmap]
+
+
+def list_cart_with_questions(session_id: str) -> list[dict]:
+    """返回 cart 内的题目详情（id, stem, question_type, difficulty），保持 cart 顺序。"""
+    items = list_cart(session_id)
+    if not items:
+        return []
+    qids = [item["question_id"] for item in items]
+    placeholders = ",".join("?" * len(qids))
+    with get_connection() as conn:
+        rows = conn.execute(
+            f"SELECT id, stem, question_type, difficulty FROM questions "
+            f"WHERE id IN ({placeholders})",
+            qids,
+        ).fetchall()
+    qmap = {r["id"]: dict(r) for r in rows}
+    return [
+        {**dict(item), **qmap[item["question_id"]]}
+        for item in items
+        if item["question_id"] in qmap
+    ]

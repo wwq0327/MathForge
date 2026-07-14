@@ -79,20 +79,8 @@ async def cart_clear(request: Request) -> HTMLResponse:
 @router.get("/papers/new")
 async def papers_new(request: Request) -> HTMLResponse:
     sid = _session_id(request)
+    cart_questions = paper_service.list_cart_with_questions(sid)
     items = paper_service.list_cart(sid)
-    qids = [item["question_id"] for item in items]
-    if qids:
-        placeholders = ",".join("?" * len(qids))
-        from app.database import get_connection
-        with get_connection() as conn:
-            rows = conn.execute(
-                f"SELECT id, stem, question_type, difficulty FROM questions WHERE id IN ({placeholders})",
-                qids,
-            ).fetchall()
-        questions = {r["id"]: dict(r) for r in rows}
-    else:
-        questions = {}
-    cart_questions = [questions.get(item["question_id"]) for item in items if item["question_id"] in questions]
     return templates.TemplateResponse(
         request, "papers/new.html",
         {
@@ -144,17 +132,8 @@ async def papers_preview(request: Request, paper_id: int) -> Response:
     paper = paper_service.get_paper(paper_id)
     if paper is None:
         return JSONResponse(status_code=404, content={"detail": "试卷不存在", "code": "not_found"})
-    questions = paper_service.get_paper_questions(paper_id)
-    answer_mode = paper["answer_mode"]
-    return templates.TemplateResponse(
-        request, "export/print.html",
-        {
-            "request": request,
-            "paper": paper,
-            "questions": questions,
-            "answer_mode": answer_mode,
-        },
-    )
+    body = _render_paper_html(request, paper_id, paper)
+    return HTMLResponse(content=body)
 
 
 @router.get("/papers/{paper_id}/export/html")
@@ -162,18 +141,7 @@ async def papers_export_html(request: Request, paper_id: int) -> Response:
     paper = paper_service.get_paper(paper_id)
     if paper is None:
         return JSONResponse(status_code=404, content={"detail": "试卷不存在", "code": "not_found"})
-    questions = paper_service.get_paper_questions(paper_id)
-    answer_mode = paper["answer_mode"]
-    rendered = templates.TemplateResponse(
-        request, "export/print.html",
-        {
-            "request": request,
-            "paper": paper,
-            "questions": questions,
-            "answer_mode": answer_mode,
-        },
-    )
-    body = rendered.body.decode() if hasattr(rendered.body, "decode") else rendered.body
+    body = _render_paper_html(request, paper_id, paper)
     return HTMLResponse(
         content=body,
         headers={"Content-Disposition": f'attachment; filename="paper-{paper_id}.html"'},
@@ -186,19 +154,23 @@ async def papers_export_latex(request: Request, paper_id: int) -> Response:
     if paper is None:
         return JSONResponse(status_code=404, content={"detail": "试卷不存在", "code": "not_found"})
     questions = paper_service.get_paper_questions(paper_id)
-    answer_mode = paper["answer_mode"]
-    rendered = templates.TemplateResponse(
-        request, "export/paper.tex.j2",
-        {
-            "request": request,
-            "paper": paper,
-            "questions": questions,
-            "answer_mode": answer_mode,
-        },
+    body = templates.env.get_template("export/paper.tex.j2").render(
+        paper=paper,
+        questions=questions,
+        answer_mode=paper["answer_mode"],
     )
-    body = rendered.body.decode() if hasattr(rendered.body, "decode") else rendered.body
     return PlainTextResponse(
         content=body,
         media_type="application/x-tex",
         headers={"Content-Disposition": f'attachment; filename="paper-{paper_id}.tex"'},
+    )
+
+
+def _render_paper_html(request: Request, paper_id: int, paper: dict) -> str:
+    """单遍渲染 print.html 模板到字符串。"""
+    questions = paper_service.get_paper_questions(paper_id)
+    return templates.env.get_template("export/print.html").render(
+        paper=paper,
+        questions=questions,
+        answer_mode=paper["answer_mode"],
     )
