@@ -86,6 +86,11 @@ class TestCartService:
         items = list_cart(session_id)
         assert len(items) == len(demo_question_ids)
 
+    def test_add_nonexistent_returns_none(self, session_id):
+        result = add_to_cart(session_id, "M9999-NOPE-999")
+        assert result is None
+        assert cart_count(session_id) == 0
+
     def test_remove_from_cart(self, session_id, demo_question_ids):
         qid = demo_question_ids[0]
         add_to_cart(session_id, qid)
@@ -195,3 +200,11 @@ class TestLatexEscape:
 
     def test_escape_tilde(self):
         assert latex_escape("~") == r"\textasciitilde{}"
+
+    def test_escape_title_with_special_chars(self):
+        """C3 回归：含 & % $ # 的标题需要转义。"""
+        result = latex_escape("My & Title 100% $test")
+        assert r"\&" in result
+        assert r"\%" in result
+        assert r"\$" in result
+        assert "100% $test" not in result

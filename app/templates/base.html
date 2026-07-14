@@ -62,5 +62,10 @@
   <footer class="max-w-6xl mx-auto px-6 py-6 text-xs text-slate-400">
     MathForge · 王老师 × AI 协作
   </footer>
+
+  <div id="cart-bar"
+       hx-get="/api/cart/summary"
+       hx-trigger="load once"
+       hx-swap="outerHTML"></div>
 </body>
 </html>

@@ -24,14 +24,19 @@ def _session_id(request: Request) -> str:
 
 
 @router.post("/api/cart/toggle")
-async def cart_toggle(request: Request, question_id: str) -> HTMLResponse:
+async def cart_toggle(request: Request, question_id: str) -> Response:
     sid = _session_id(request)
     cart = paper_service.list_cart(sid)
     qids = {item["question_id"] for item in cart}
     if question_id in qids:
         paper_service.remove_from_cart(sid, question_id)
     else:
-        paper_service.add_to_cart(sid, question_id)
+        result = paper_service.add_to_cart(sid, question_id)
+        if result is None:
+            return JSONResponse(
+                status_code=404,
+                content={"detail": "题目不存在", "code": "not_found"},
+            )
     count = paper_service.cart_count(sid)
     return templates.TemplateResponse(
         request, "papers/_cart_bar.html",
@@ -63,7 +68,7 @@ async def cart_clear(request: Request) -> HTMLResponse:
     sid = _session_id(request)
     paper_service.clear_cart(sid)
     return templates.TemplateResponse(
-        "papers/_cart_bar.html",
+        request, "papers/_cart_bar.html",
         {"request": request, "count": 0},
     )
 

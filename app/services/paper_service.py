@@ -29,9 +29,13 @@ def latex_escape(text: str) -> str:
     return text.translate(_LATEX_SPECIAL) if text else text
 
 
-def add_to_cart(session_id: str, question_id: str) -> int:
-    """添加题目到 cart，返回当前 cart 总数。重复添加幂等。"""
+def add_to_cart(session_id: str, question_id: str) -> int | None:
+    """添加题目到 cart，返回当前 cart 总数。题目不存在返回 None。重复添加幂等。"""
     with get_connection() as conn:
+        if conn.execute(
+            "SELECT 1 FROM questions WHERE id=?", (question_id,)
+        ).fetchone() is None:
+            return None
         existing = conn.execute(
             "SELECT id FROM cart_items WHERE session_id=? AND question_id=?",
             (session_id, question_id),
